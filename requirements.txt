@@ -1,0 +1,17 @@
+streamlit
+numpy
+pandas
+sentence-transformers
+faiss-cpu
+pypdf
+pdfplumber
+rank-bm25
+groq
+langchain
+langchain-text-splitters
+nltk
+bert-score
+rouge-score
+scikit-learn
+torch
+transformers
