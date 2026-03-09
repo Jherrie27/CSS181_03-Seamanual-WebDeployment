@@ -12,7 +12,7 @@ from pipeline import MODEL_DISPLAY_NAME, generate_answer, healthcheck, warmup
 
 st.set_page_config(
     page_title="Seamanual",
-    page_icon="⚓",
+    page_icon="",
     layout="wide",
 )
 
@@ -120,8 +120,8 @@ with st.sidebar:
 # MAIN
 # =============================================================================
 
-st.title("⚓ Seamanual")
-st.caption("US Navy Seaman Training Manual — NAVEDTRA 14067")
+st.title("Seamanual")
+st.caption("Seaman Training Manual — NAVEDTRA 14067")
 
 if startup_error:
     st.error(
@@ -132,7 +132,7 @@ if startup_error:
 
 st.markdown(
     """
-Ask any question about the **US Navy Seaman Training Manual (NAVEDTRA 14067)**.
+Ask any question about the **Seaman Training Manual (NAVEDTRA 14067)**.
 
 Pipeline: BGE-Large dense retrieval · BM25 sparse retrieval · RRF fusion · Cross-encoder reranker · Groq answer generation
 """
@@ -210,3 +210,4 @@ if st.session_state.chat_history:
                 render_chunks(turn.get("chunks", []))
 else:
     st.info("Ask a question to begin.")
+
