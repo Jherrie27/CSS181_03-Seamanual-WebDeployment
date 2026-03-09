@@ -71,7 +71,7 @@ with st.sidebar:
 
     st.markdown("### About")
     st.write(
-        "RAG chatbot for the POEA Standard Employment Contract for Seafarers."
+        "RAG chatbot for Seaman Guidebook."
     )
 
     if st.button("Clear conversation", use_container_width=True):
@@ -210,5 +210,6 @@ if st.session_state.chat_history:
 else:
 
     st.info("Ask a question to begin.")
+
 
 
