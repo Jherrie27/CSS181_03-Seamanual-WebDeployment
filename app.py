@@ -63,7 +63,7 @@ def render_chunks(chunks: list[dict]) -> None:
 
 def render_metrics(turn: dict) -> None:
     m = turn.get("metrics", {})
-    st.markdown("**📊 Evaluation Metrics**")
+    st.markdown("**Evaluation Metrics**")
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Recall@K",          f"{m.get('recall_at_k',       0.0):.4f}")
     col2.metric("Precision@K",       f"{m.get('precision_at_k',    0.0):.4f}")
@@ -86,7 +86,7 @@ with st.sidebar:
     st.caption(f"Model: {MODEL_DISPLAY_NAME}")
 
     st.markdown("### About")
-    st.write("RAG chatbot for the US Navy Seaman Training Manual (NAVEDTRA 14067).")
+    st.write("RAG chatbot for the Seaman Training Manual (NAVEDTRA 14067).")
 
     if st.button("Clear conversation", use_container_width=True):
         reset_app()
@@ -210,4 +210,5 @@ if st.session_state.chat_history:
                 render_chunks(turn.get("chunks", []))
 else:
     st.info("Ask a question to begin.")
+
 
