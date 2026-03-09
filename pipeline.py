@@ -31,9 +31,6 @@ MODEL_LABEL        = "Llama-3.1-8B-Instant (Groq)"
 MODEL_DISPLAY_NAME = "Llama-3.1-8B-Instant"
 GROQ_MODEL         = "llama-3.1-8b-instant"
 
-# ── Lightweight models that fit in Streamlit Cloud's 1 GB RAM ─────────────────
-# BGE-Large (335M, 1024-dim) → all-MiniLM-L6-v2 (22M, 384-dim) ~15× smaller
-# BGE-Reranker-v2-m3 (570M) → ms-marco-MiniLM-L-6-v2 (22M)    ~25× smaller
 EMBED_MODEL  = "BAAI/bge-large-en-v1.5"
 RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
@@ -66,21 +63,16 @@ def get_groq_client():
 # ── Section detector ──────────────────────────────────────────────────────────
 
 _META_PATTERNS = [
-    (r"(?i)\bsection\s+(\d+[A-Za-z]?)\b",               "Section {}"),
-    (r"(?i)\bpart\s+(I{1,3}V?|VI{0,3}|\d+)\b",          "Part {}"),
-    (r"(?i)\b(medical benefit|sickness|treatment|injur)", "Medical Benefits"),
-    (r"(?i)\b(death benefit|burial|deceased)",            "Death & Burial Benefits"),
-    (r"(?i)\b(disabilit)",                                "Disability Benefits"),
-    (r"(?i)\b(repatri)",                                  "Repatriation"),
-    (r"(?i)\b(overtime|working hours)",                   "Working Hours & Overtime"),
-    (r"(?i)\b(basic salary|basic wage|monthly salary)",   "Wages & Salary"),
-    (r"(?i)\b(allotment|remittance)",                     "Allotment & Remittance"),
-    (r"(?i)\b(terminat|dismissal|disciplin)",             "Termination & Discipline"),
-    (r"(?i)\b(insurance|coverage|personal accident)",     "Insurance"),
-    (r"(?i)\b(placement fee|recruitment fee)",            "Placement & Recruitment"),
-    (r"(?i)\b(due process|right to be heard)",            "Due Process"),
-    (r"(?i)\b(beneficiar|qualified dependent)",           "Beneficiaries"),
-    (r"(?i)\b(obligation|employer shall|ship owner)",     "Employer Obligations"),
+    (r"(?i)\bchapter\s+(\d+)\b",                          "Chapter {}"),
+    (r"(?i)\b(watch|watchstand)",                          "Watches"),
+    (r"(?i)\b(marlinespike|splice|knot|hitch)",            "Marlinespike Seamanship"),
+    (r"(?i)\b(anchor|mooring|line.handl|weather deck)",    "Deck Seamanship"),
+    (r"(?i)\b(lifeboat|boat seamanship|davit)",            "Boat Seamanship"),
+    (r"(?i)\b(ammunition|gunnery|projectile|caliber)",     "Ammunition & Gunnery"),
+    (r"(?i)\b(navigation|colregs|lateral mark|buoy)",      "Navigation Rules"),
+    (r"(?i)\b(sound.powered|telephone talker)",            "Watchstanders Equipment"),
+    (r"(?i)\bsection\s+(\d+[A-Za-z]?)\b",                 "Section {}"),
+    (r"(?i)\bpart\s+(I{1,3}V?|VI{0,3}|\d+)\b",            "Part {}"),
 ]
 
 def _detect_section(text):
@@ -249,66 +241,44 @@ _STOPWORDS = {
 }
 
 MARITIME_SYNONYMS = {
-    r"\bcontract\b":                            "contract employment term duration period agreement",
-    r"\bsalary\b|\bwage\b":                     "salary wage pay basic compensation monthly rate",
-    r"\bmedical\b":                             "medical sickness injury treatment illness hospitalization medicine",
-    r"\brepatri\w+":                            "repatriation repatriated return passage homeward cost expense transport",
-    r"\bdeath\b|\bdi(ed|es)\b":                 "death deceased die died burial compensation beneficiary",
-    r"\bdisciplin\w+":                          "disciplinary discipline offense misconduct penalty dismiss sanction violation",
-    r"\bovertime\b":                            "overtime hours work additional pay rate beyond",
-    r"\binsurance\b":                           "insurance coverage protection life accident personal",
-    r"\bterminat\w+":                           "termination pre-termination dismissal grounds cause end",
-    r"\bdisability\b|\bdisabled\b":             "disability disabled permanent total partial grade schedule injury",
-    r"\ballotment\b":                           "allotment remittance family beneficiary percent percentage monthly mandatory",
-    r"\bleave\b":                               "leave vacation rest days paid entitlement annual",
-    r"\bplacement\b":                           "placement fee recruitment agency prohibited illegal banned",
-    r"\bbenefit\w*":                            "benefit benefits compensation payment entitlement",
-    r"\bseafarer\b":                            "seafarer crew member mariner employee worker",
-    r"\bemployer\b":                            "employer owner company agency principal obligation shall",
-    r"\bdocument\w*":                           "documents document copy given provided contract departure embarkation",
-    r"\bdeparture\b":                           "departure embarkation sign-off prior departure leaving document copy",
-    r"\bworking\s+hours\b|\bwork\s+hours\b|\bhours\b": "working hours eight regular daily standard per day",
-    r"\bdue\s+process\b":                       "due process dismiss hearing explain opportunity informed",
-    r"\b120\b":                                 "120 days hundred treatment disability assessment period beyond",
-    r"\ballowanc\w+":                           "allowance subsistence vacation leave pay entitlement additional",
-    r"\breimburs\w+":                           "reimbursement reimburse expense cost shoulder pay",
-    r"\bliable\b|\bliability\b":                "liable liability responsible obligation penalty",
-    r"\bbeneficiar\w+":                         "beneficiary beneficiaries qualified spouse children dependent family",
-    r"\bsickness\b|\bill\w*\b":                 "sickness sick illness injury allowance treatment basic wage rate",
-    r"\bfee\w*":                                "fee fees placement recruitment prohibited banned",
-    r"\bobligat\w+":                            "obligation obligations employer shall must provide duty responsible",
-    r"\bpercent\b|\b%\b":                       "percent percentage allotment mandatory minimum salary portion",
-    r"\bfail\b|\bfails\b|\bfailed\b":           "fail fails failed failure employer repatriation liable responsible",
-    r"\bshoulder\w*":                           "shoulder cost expense pay responsible employer repatriation",
-    r"\bqualified\b":                           "qualified beneficiary spouse children dependent entitled",
-    r"\bstandard\b":                            "standard regular normal working hours eight daily",
-    r"\bcondit\w+":                             "conditions terms when may circumstances case grounds",
-    r"\bground\w*":                             "grounds conditions cause reasons justification termination",
-    r"\bobligation\w*":                         "obligation duty shall provide employer required",
+    r"\bwatch\b":                      "watch watchstander lookout duty post officer deck",
+    r"\bknot\b|\bhitch\b":             "knot hitch clove bowline splice marlinespike line",
+    r"\bsplice\b":                     "splice eye splice nylon manila strand tuck",
+    r"\banchor\b":                     "anchor letting go brake chain fathom shot",
+    r"\blifeboat\b":                   "lifeboat boat seamanship davit handling launching",
+    r"\bprojectile\b|\bammunition\b":  "projectile ammunition caliber gun bore gunnery",
+    r"\bnavigation\b":                 "navigation colregs rules lights buoy lateral",
+    r"\bdeck\b":                       "deck seamanship mooring line handling weather",
+    r"\bsound.powered\b":              "sound powered telephone talker communication",
+    r"\bhelm\b|\bhelmsman\b":          "helm helmsman steering conning officer",
+    r"\bfiring\b|\bgunner\w*":         "firing gunnery commence gun control authorized",
+    r"\blookout\b":                    "lookout watch visual signal report sighting",
+    r"\bmarlinespike\b":               "marlinespike seamanship knot line rope splice hitch",
+    r"\bboat\b":                       "boat lifeboat davit seamanship handling crew",
+    r"\bsignal\b":                     "signal visual flag semaphore communication report",
 }
 
 _MQ_PROMPT = (
-    "Generate exactly 3 different search queries to retrieve relevant clauses from the "
-    "NAVEDTRA14067. Rephrase the question using formal legal language. "
+    "Generate exactly 3 different search queries to retrieve relevant passages from the "
+    "US Navy Seaman Training Manual (NAVEDTRA 14067). Use formal nautical/military language. "
     "Output only the 3 queries, one per line, no numbering or bullets.\n\nQuestion: {q}"
 )
 _MQ_MODEL = "llama-3.1-8b-instant"
 
 SYSTEM_PROMPT = (
-    "You are an expert maritime labor law assistant specializing in "
-    "the NAVEDTRA14067.\n"
-    "Each context block begins with [Source: <section>] indicating which part of the "
-    "contract it comes from. Use this metadata to cite the correct section in your answer.\n"
+    "You are an expert US Navy seamanship instructor specializing in the "
+    "NAVEDTRA 14067 Seaman training manual.\n"
+    "Each context block begins with [Source: <section>]. Cite the section in your answer.\n"
     "RULES:\n"
     "1. Answer ONLY using information explicitly stated in the provided context.\n"
     "2. NEVER say: 'I cannot find', 'not mentioned', 'context does not contain', "
     "   'not in context', 'not provided'. These phrases are forbidden.\n"
-    "3. Cite the source section (e.g. 'Under Medical Benefits...') when visible.\n"
+    "3. Cite the source section (e.g. 'Under Watches...') when visible.\n"
     "4. If the context gives partial information, use it to construct the best possible answer."
 )
 
 STRICT_PROMPT = (
-    "You are a strict NAVEDTRA14067 assistant. "
+    "You are a strict NAVEDTRA 14067 instructor. "
     "Use ONLY sentences directly verifiable in the provided context blocks. "
     "Each block starts with [Source: section]. Cite the section in your answer. "
     "No external knowledge. No speculation."
@@ -349,8 +319,8 @@ def _multi_query(query):
     kw = " ".join(stems[:6]) if stems else query
     return [
         query,
-        f"What does the NAVEDTRA14067 state regarding {kw}?",
-        f"Under the NAVEDTRA14067, what are the rules concerning {kw}?",
+        f"What does the Navy Seaman manual state regarding {kw}?",
+        f"According to NAVEDTRA 14067, what are the procedures for {kw}?",
     ]
 
 def retrieve_context(query, k_init=DEFAULT_K_INIT, k_final=DEFAULT_K_FINAL):
@@ -447,27 +417,77 @@ def _call_model(query, context, system_prompt):
         model=GROQ_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Context from official NAVEDTRA14067 documents:\n---\n{context}\n---\n\nQuestion: {query}\n\nAnswer:"},
+            {"role": "user", "content": f"Context from NAVEDTRA 14067:\n---\n{context}\n---\n\nQuestion: {query}\n\nAnswer:"},
         ],
         max_tokens=300, temperature=0.2,
     )
     return (resp.choices[0].message.content or "").strip()
 
-def generate_answer(query):
+# ── Eval metrics ──────────────────────────────────────────────────────────────
+
+def _compute_recall_at_k(chunk_rows, keywords):
+    if not keywords: return 1.0
+    combined = " ".join(r["text"] for r in chunk_rows).lower()
+    return round(sum(1 for kw in keywords if kw.lower() in combined) / len(keywords), 4)
+
+def _compute_precision_at_k(chunk_rows, keywords):
+    if not chunk_rows or not keywords: return 0.0
+    relevant = sum(1 for r in chunk_rows if any(kw.lower() in r["text"].lower() for kw in keywords))
+    return round(relevant / len(chunk_rows), 4)
+
+def _compute_context_relevancy(query, chunk_rows):
+    if not chunk_rows: return 0.0
+    embedder = load_embedder()
+    q_emb  = embedder.encode([query], normalize_embeddings=True, convert_to_numpy=True)[0]
+    c_embs = embedder.encode([r["text"] for r in chunk_rows], normalize_embeddings=True, convert_to_numpy=True)
+    return round(float(np.mean([_cos(q_emb, c) for c in c_embs])), 4)
+
+def _compute_answer_relevancy(query, answer):
+    if not answer.strip(): return 0.0
+    embedder = load_embedder()
+    q_emb = embedder.encode([query],  normalize_embeddings=True, convert_to_numpy=True)[0]
+    a_emb = embedder.encode([answer], normalize_embeddings=True, convert_to_numpy=True)[0]
+    return round(_cos(q_emb, a_emb), 4)
+
+def _compute_rouge_l(hypothesis, reference=""):
+    if not hypothesis.strip() or not reference.strip(): return 0.0
+    try:
+        from rouge_score import rouge_scorer as rs_module
+        scorer = rs_module.RougeScorer(["rougeL"], use_stemmer=True)
+        return round(scorer.score(reference, hypothesis)["rougeL"].fmeasure, 4)
+    except Exception:
+        return 0.0
+
+def _compute_bert_score(answer, reference=""):
+    if not answer.strip() or not reference.strip(): return 0.0
+    try:
+        from bert_score import score as bs_fn
+        _, _, F1 = bs_fn([answer], [reference], model_type="distilbert-base-uncased",
+                         lang="en", verbose=False)
+        return round(float(F1[0]), 4)
+    except Exception:
+        return 0.0
+
+# ── Generate answer ───────────────────────────────────────────────────────────
+
+def generate_answer(query: str, keywords: list[str] | None = None,
+                    reference: str = "") -> dict[str, Any]:
     if not query or not query.strip():
         return {"answer": "Please enter a valid question.", "context": "", "chunks": [],
-                "latency_sec": 0.0, "confidence": 0.0, "query": query}
+                "latency_sec": 0.0, "confidence": 0.0, "metrics": {}, "query": query}
+
     t_start = time.time()
     try:
         context, chunk_rows, confidence = retrieve_context(query)
     except Exception as e:
         return {"answer": f"Retrieval error: {e}", "context": "", "chunks": [],
-                "latency_sec": 0.0, "confidence": 0.0, "query": query}
+                "latency_sec": 0.0, "confidence": 0.0, "metrics": {}, "query": query}
+
     try:
         answer = _call_model(query, context, SYSTEM_PROMPT)
     except Exception as e:
         return {"answer": f"Generation error: {e}", "context": context, "chunks": chunk_rows,
-                "latency_sec": 0.0, "confidence": confidence, "query": query}
+                "latency_sec": 0.0, "confidence": confidence, "metrics": {}, "query": query}
 
     faith_orig = _faith_inline(answer, chunk_rows)
     if faith_orig < 0.35:
@@ -479,10 +499,30 @@ def generate_answer(query):
             pass
 
     latency = round(time.time() - t_start, 2)
+
+    # Auto-extract keywords from query if not provided
+    kws = keywords or [w for w in re.findall(r"\b[a-zA-Z]{4,}\b", query)
+                       if w.lower() not in _STOPWORDS][:6]
+
+    metrics = {
+        "recall_at_k":       _compute_recall_at_k(chunk_rows, kws),
+        "precision_at_k":    _compute_precision_at_k(chunk_rows, kws),
+        "context_relevancy": _compute_context_relevancy(query, chunk_rows),
+        "faithfulness":      round(_faith_inline(answer, chunk_rows), 4),
+        "answer_relevancy":  _compute_answer_relevancy(query, answer),
+        "rouge_l":           _compute_rouge_l(answer, reference),
+        "bert_score":        _compute_bert_score(answer, reference),
+    }
+
     return {
-        "query": query, "answer": answer, "context": context, "chunks": chunk_rows,
-        "latency_sec": latency, "confidence": round(float(confidence), 4),
-        "faithfulness_estimate": round(float(_faith_inline(answer, chunk_rows)), 4),
+        "query":       query,
+        "answer":      answer,
+        "context":     context,
+        "chunks":      chunk_rows,
+        "latency_sec": latency,
+        "confidence":  round(float(confidence), 4),
+        "faithfulness_estimate": metrics["faithfulness"],  # kept for backward compat
+        "metrics":     metrics,
     }
 
 # ── App support ───────────────────────────────────────────────────────────────
@@ -514,5 +554,6 @@ def healthcheck():
 
 if __name__ == "__main__":
     warmup()
-    test = generate_answer("What is the maximum duration of a seafarer's employment contract?")
+    test = generate_answer("What are the responsibilities of a seaman standing watch?")
     print(test["answer"])
+    print(test["metrics"])
