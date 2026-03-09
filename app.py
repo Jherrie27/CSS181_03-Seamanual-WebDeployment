@@ -11,8 +11,8 @@ from pipeline import MODEL_DISPLAY_NAME, generate_answer, healthcheck, warmup
 # =============================================================================
 
 st.set_page_config(
-    page_title="SeamanBot",
-    page_icon="⚓",
+    page_title="Seamanual",
+    page_icon=" ",
     layout="wide",
 )
 
@@ -66,7 +66,7 @@ def render_chunks(chunks: list[dict]) -> None:
 # =============================================================================
 
 with st.sidebar:
-    st.title("SeamanBot")
+    st.title("Seamanual")
     st.caption(f"Model: {MODEL_DISPLAY_NAME}")
 
     st.markdown("### About")
@@ -107,7 +107,7 @@ with st.sidebar:
 # MAIN
 # =============================================================================
 
-st.title("⚓ SeamanBot")
+st.title(" Seamanual")
 st.caption("POEA Standard Employment Contract for Filipino Seafarers")
 
 if startup_error:
@@ -119,7 +119,7 @@ if startup_error:
 
 st.markdown(
     """
-Ask any question about the **POEA Standard Employment Contract for Filipino Seafarers**.
+Ask any question about the **POEA Standard Employment Contract for Seafarers**.
 
 This Streamlit version is adapted from your notebook and uses:
 - BGE-Large dense retrieval
@@ -208,4 +208,5 @@ if st.session_state.chat_history:
             with st.expander("Retrieved chunks", expanded=False):
                 render_chunks(turn.get("chunks", []))
 else:
+
     st.info("Ask a question to begin.")
