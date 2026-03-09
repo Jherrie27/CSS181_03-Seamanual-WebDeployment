@@ -108,7 +108,7 @@ with st.sidebar:
 # =============================================================================
 
 st.title(" Seamanual")
-st.caption("POEA Standard Employment Contract for Filipino Seafarers")
+st.caption("A Seaman/Seafarer Guidebook")
 
 if startup_error:
     st.error(
@@ -119,7 +119,7 @@ if startup_error:
 
 st.markdown(
     """
-Ask any question about the **POEA Standard Employment Contract for Seafarers**.
+Ask any question about the **Seaman Guidebook**.
 
 This Streamlit version is adapted from your notebook and uses:
 - BGE-Large dense retrieval
@@ -210,6 +210,7 @@ if st.session_state.chat_history:
 else:
 
     st.info("Ask a question to begin.")
+
 
 
 
