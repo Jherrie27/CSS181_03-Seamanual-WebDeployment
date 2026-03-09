@@ -143,7 +143,7 @@ with st.form("ask_form", clear_on_submit=False):
         height=100,
         placeholder="e.g. What is the maximum contract duration?",
     )
-    submitted = st.form_submit_button("Ask SeamanBot", use_container_width=True)
+    submitted = st.form_submit_button("Send Question", use_container_width=True)
 
 # =============================================================================
 # RUN QUERY
@@ -210,4 +210,5 @@ if st.session_state.chat_history:
 else:
 
     st.info("Ask a question to begin.")
+
 
