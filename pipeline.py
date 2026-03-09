@@ -447,7 +447,7 @@ def _call_model(query, context, system_prompt):
         model=GROQ_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Context from official POEA documents:\n---\n{context}\n---\n\nQuestion: {query}\n\nAnswer:"},
+            {"role": "user", "content": f"Context from official NAVEDTRA14067 documents:\n---\n{context}\n---\n\nQuestion: {query}\n\nAnswer:"},
         ],
         max_tokens=300, temperature=0.2,
     )
