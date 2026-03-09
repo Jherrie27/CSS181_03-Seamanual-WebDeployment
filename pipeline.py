@@ -30,11 +30,16 @@ BM25_PATH   = DATA_DIR / "bm25.pkl"
 MODEL_LABEL        = "Llama-3.1-8B-Instant (Groq)"
 MODEL_DISPLAY_NAME = "Llama-3.1-8B-Instant"
 GROQ_MODEL         = "llama-3.1-8b-instant"
-EMBED_MODEL        = "BAAI/bge-large-en-v1.5"
-RERANK_MODEL       = "BAAI/bge-reranker-v2-m3"
-DEFAULT_K_INIT     = 80
-DEFAULT_K_FINAL    = 5
-MAX_RERANK_POOL    = 120
+
+# ── Lightweight models that fit in Streamlit Cloud's 1 GB RAM ─────────────────
+# BGE-Large (335M, 1024-dim) → all-MiniLM-L6-v2 (22M, 384-dim) ~15× smaller
+# BGE-Reranker-v2-m3 (570M) → ms-marco-MiniLM-L-6-v2 (22M)    ~25× smaller
+EMBED_MODEL  = "BAAI/bge-large-en-v1.5"
+RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+DEFAULT_K_INIT  = 80
+DEFAULT_K_FINAL = 5
+MAX_RERANK_POOL = 120
 
 # ── Groq client ───────────────────────────────────────────────────────────────
 
@@ -127,7 +132,6 @@ def _extract_pdf(pdf_path):
 # ── Auto asset builder ────────────────────────────────────────────────────────
 
 def _build_assets():
-    """Build indexes from seaman.pdf. Runs automatically on first startup."""
     try:
         import streamlit as st
         status = st.status("⚙️ First-run setup: indexing seaman.pdf…", expanded=True)
@@ -141,10 +145,7 @@ def _build_assets():
             except Exception: pass
 
     if not PDF_PATH.exists():
-        raise FileNotFoundError(
-            f"data/seaman.pdf not found at {PDF_PATH}. "
-            "Ensure data/seaman.pdf is committed to your GitHub repository."
-        )
+        raise FileNotFoundError(f"data/seaman.pdf not found. Commit it to your repo.")
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     log("📄 Extracting text from seaman.pdf…")
@@ -165,14 +166,13 @@ def _build_assets():
         {"chunk_id": f"chunk_{i}", "section": _detect_section(c), "text": c}
         for i, c in enumerate(raw_chunks)
     ]
-    avg = sum(len(c["text"]) for c in chunks) // len(chunks)
-    log(f"   → {len(chunks)} chunks, avg {avg} chars")
+    log(f"   → {len(chunks)} chunks")
 
-    log(f"🔢 Building BGE-Large embeddings…")
+    log(f"🔢 Building embeddings ({EMBED_MODEL})…")
     embedder = SentenceTransformer(EMBED_MODEL)
     texts = [row["text"] for row in chunks]
     embeddings = embedder.encode(
-        texts, batch_size=32, show_progress_bar=False,
+        texts, batch_size=64, show_progress_bar=False,
         normalize_embeddings=True, convert_to_numpy=True,
     ).astype(np.float32)
 
@@ -486,7 +486,6 @@ def generate_answer(query):
 # ── App support ───────────────────────────────────────────────────────────────
 
 def warmup():
-    """Called by app.py at startup. Auto-builds assets if missing."""
     _ensure_assets()
     _ = get_groq_client()
     _ = load_chunks()
