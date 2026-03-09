@@ -289,7 +289,7 @@ MARITIME_SYNONYMS = {
 
 _MQ_PROMPT = (
     "Generate exactly 3 different search queries to retrieve relevant clauses from the "
-    "POEA Standard Employment Contract. Rephrase the question using formal legal language. "
+    "NAVEDTRA14067. Rephrase the question using formal legal language. "
     "Output only the 3 queries, one per line, no numbering or bullets.\n\nQuestion: {q}"
 )
 _MQ_MODEL = "llama-3.1-8b-instant"
@@ -349,8 +349,8 @@ def _multi_query(query):
     kw = " ".join(stems[:6]) if stems else query
     return [
         query,
-        f"What does the POEA Standard Employment Contract state regarding {kw}?",
-        f"Under the POEA SEC, what are the rules concerning {kw}?",
+        f"What does the NAVEDTRA14067 state regarding {kw}?",
+        f"Under the NAVEDTRA14067, what are the rules concerning {kw}?",
     ]
 
 def retrieve_context(query, k_init=DEFAULT_K_INIT, k_final=DEFAULT_K_FINAL):
