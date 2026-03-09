@@ -12,7 +12,7 @@ from pipeline import MODEL_DISPLAY_NAME, generate_answer, healthcheck, warmup
 
 st.set_page_config(
     page_title="Seamanual",
-    page_icon=" ",
+    page_icon="⚓",
     layout="wide",
 )
 
@@ -61,6 +61,22 @@ def render_chunks(chunks: list[dict]) -> None:
             st.write(row.get("text", ""))
 
 
+def render_metrics(turn: dict) -> None:
+    m = turn.get("metrics", {})
+    st.markdown("**📊 Evaluation Metrics**")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Recall@K",          f"{m.get('recall_at_k',       0.0):.4f}")
+    col2.metric("Precision@K",       f"{m.get('precision_at_k',    0.0):.4f}")
+    col3.metric("Context Relevancy", f"{m.get('context_relevancy', 0.0):.4f}")
+    col4.metric("Faithfulness",      f"{m.get('faithfulness',      0.0):.4f}")
+
+    col5, col6, col7, col8 = st.columns(4)
+    col5.metric("Answer Relevancy",  f"{m.get('answer_relevancy',  0.0):.4f}")
+    col6.metric("ROUGE-L",           f"{m.get('rouge_l',           0.0):.4f}")
+    col7.metric("BERTScore",         f"{m.get('bert_score',        0.0):.4f}")
+    col8.metric("Latency (s)",       f"{turn.get('latency_sec',    0.0):.2f}")
+
+
 # =============================================================================
 # SIDEBAR
 # =============================================================================
@@ -70,9 +86,7 @@ with st.sidebar:
     st.caption(f"Model: {MODEL_DISPLAY_NAME}")
 
     st.markdown("### About")
-    st.write(
-        "RAG chatbot for Seaman Guidebook."
-    )
+    st.write("RAG chatbot for the US Navy Seaman Training Manual (NAVEDTRA 14067).")
 
     if st.button("Clear conversation", use_container_width=True):
         reset_app()
@@ -87,28 +101,27 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### Example questions")
 
-    if st.button("Maximum contract duration", use_container_width=True):
-        st.session_state.example_query = "What is the maximum duration of a seafarer's employment contract?"
-        st.session_state.input_value = st.session_state.example_query
-
-    if st.button("Medical benefits on injury", use_container_width=True):
-        st.session_state.example_query = "What medical benefits are available to seafarers who get injured on board?"
-        st.session_state.input_value = st.session_state.example_query
-
-    if st.button("Overtime pay", use_container_width=True):
-        st.session_state.example_query = "Is a seafarer entitled to overtime pay?"
-        st.session_state.input_value = st.session_state.example_query
-
-    if st.button("Death benefits", use_container_width=True):
-        st.session_state.example_query = "What death benefits are provided if a seafarer dies during the contract?"
-        st.session_state.input_value = st.session_state.example_query
+    examples = [
+        ("Watchstander responsibilities",  "What are the responsibilities of a seaman standing watch on deck?"),
+        ("Relieving a watch post",         "What should a watchstander do before leaving their post?"),
+        ("Eye splice procedure",           "What is the correct procedure for making an eye splice with nylon line?"),
+        ("Letting go the anchor",          "What is the proper procedure for letting go the anchor?"),
+        ("Lifeboat handling",              "What is the proper procedure for handling a lifeboat?"),
+        ("Naval projectile types",         "What are the different types of naval projectiles?"),
+        ("Sound-powered telephone",        "What is a sound-powered telephone and how is it used?"),
+        ("COMMENCE FIRING command",        "What does the COMMENCE FIRING command mean?"),
+    ]
+    for label, q in examples:
+        if st.button(label, use_container_width=True):
+            st.session_state.example_query = q
+            st.session_state.input_value   = q
 
 # =============================================================================
 # MAIN
 # =============================================================================
 
-st.title(" Seamanual")
-st.caption("A Seaman/Seafarer Guidebook")
+st.title("⚓ Seamanual")
+st.caption("US Navy Seaman Training Manual — NAVEDTRA 14067")
 
 if startup_error:
     st.error(
@@ -119,14 +132,9 @@ if startup_error:
 
 st.markdown(
     """
-Ask any question about the **Seaman Guidebook**.
+Ask any question about the **US Navy Seaman Training Manual (NAVEDTRA 14067)**.
 
-This Streamlit version is adapted from your notebook and uses:
-- BGE-Large dense retrieval
-- BM25 sparse retrieval
-- RRF fusion
-- BGE reranker
-- Groq answer generation
+Pipeline: BGE-Large dense retrieval · BM25 sparse retrieval · RRF fusion · Cross-encoder reranker · Groq answer generation
 """
 )
 
@@ -141,7 +149,7 @@ with st.form("ask_form", clear_on_submit=False):
         "Question",
         value=default_query,
         height=100,
-        placeholder="e.g. What is the maximum contract duration?",
+        placeholder="e.g. What are the responsibilities of a seaman standing watch?",
     )
     submitted = st.form_submit_button("Send Question", use_container_width=True)
 
@@ -157,24 +165,21 @@ if submitted:
     elif len(clean_query) < 5:
         st.warning("Question too short.")
     else:
-        st.session_state.input_value = ""
+        st.session_state.input_value   = ""
         st.session_state.example_query = ""
 
         try:
             with st.spinner("Retrieving context and generating answer..."):
                 result = generate_answer(clean_query)
 
-            st.session_state.chat_history.append(
-                {
-                    "user": clean_query,
-                    "assistant": result["answer"],
-                    "latency_sec": result.get("latency_sec", 0.0),
-                    "confidence": result.get("confidence", 0.0),
-                    "faithfulness_estimate": result.get("faithfulness_estimate", 0.0),
-                    "context": result.get("context", ""),
-                    "chunks": result.get("chunks", []),
-                }
-            )
+            st.session_state.chat_history.append({
+                "user":        clean_query,
+                "assistant":   result["answer"],
+                "latency_sec": result.get("latency_sec", 0.0),
+                "context":     result.get("context", ""),
+                "chunks":      result.get("chunks", []),
+                "metrics":     result.get("metrics", {}),
+            })
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
@@ -192,11 +197,7 @@ if st.session_state.chat_history:
 
         with st.chat_message("assistant"):
             st.write(turn["assistant"])
-
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Latency (s)", f"{turn.get('latency_sec', 0.0):.2f}")
-            col2.metric("Retrieval confidence", f"{turn.get('confidence', 0.0):.4f}")
-            col3.metric("Faithfulness estimate", f"{turn.get('faithfulness_estimate', 0.0):.4f}")
+            render_metrics(turn)
 
             with st.expander("Retrieved context", expanded=False):
                 context = turn.get("context", "")
@@ -208,9 +209,4 @@ if st.session_state.chat_history:
             with st.expander("Retrieved chunks", expanded=False):
                 render_chunks(turn.get("chunks", []))
 else:
-
     st.info("Ask a question to begin.")
-
-
-
-
